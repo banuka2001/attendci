@@ -36,7 +36,7 @@ if (isset($data->username) && isset($data->password)) {
                     'role' => $user['role']
                 ]);
             } else {
-                echo json_encode(['success' => false, 'message' => "Invalid password."]);
+                echo json_encode(['success' => false, 'message' => "Invalid password or Username."]);
             }
         } else {
             echo json_encode(['success' => false, 'message' => "No user found with that username."]);
