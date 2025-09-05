@@ -15,7 +15,7 @@ import AddClassesPage from './AddClassesPage';
 import StudentEnrollPage from './StudentEnrollPage';
 import Dashboard from './Dashboard';
 
-const DashboardPage = () => {
+const HomePage = () => {
     const { user, logout } = useAuth();
     const [isSidebarOpen, setSidebarOpen] = useState(false);
     const [activeItem, setActiveItem] = useState('Dashboard'); // State for active item
@@ -112,7 +112,7 @@ const DashboardPage = () => {
             <div className="flex-1 flex flex-col overflow-hidden">
                 {/* Main Header */}
                 <header className="flex justify-between items-center p-4 bg-white border-b border-gray-200">
-                    <h1 className="text-xl font-bold text-gray-800">DASHBOARD</h1>
+                    <h1 className="text-xl font-bold text-gray-800 uppercase">{activeItem}</h1>
                     <button className="lg:hidden text-gray-600 hover:text-gray-800" onClick={() => setSidebarOpen(true)}>
                         <MdMenu size={28} />
                     </button>
@@ -134,4 +134,4 @@ const DashboardPage = () => {
     );
 };
 
-export default DashboardPage;
+export default HomePage;
