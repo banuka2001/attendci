@@ -1,3 +1,9 @@
+
+
+
+
+
+
 import React, { createContext, useState, useContext, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 
@@ -5,6 +11,7 @@ const AuthContext = createContext(null);
 
 export const AuthProvider = ({ children }) => {
     const [user, setUser] = useState(null);
+    const [isInitializing, setIsInitializing] = useState(true);
     const navigate = useNavigate();
 
     useEffect(() => {
@@ -13,6 +20,7 @@ export const AuthProvider = ({ children }) => {
         if (storedUser) {
             setUser(JSON.parse(storedUser));
         }
+        setIsInitializing(false);
     }, []);
 
     const login = (userData) => {
@@ -31,7 +39,7 @@ export const AuthProvider = ({ children }) => {
     const isAuthenticated = !!user;
 
     return (
-        <AuthContext.Provider value={{ user, isAuthenticated, login, logout }}>
+        <AuthContext.Provider value={{ user, isAuthenticated, isInitializing, login, logout }}>
             {children}
         </AuthContext.Provider>
     );
