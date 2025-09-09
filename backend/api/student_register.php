@@ -7,18 +7,8 @@ header("Content-Type: application/json");
 error_reporting(E_ALL);
 ini_set('display_errors', 1);
 
-// DB connection
-$host = "localhost";
-$user = "root";
-$pass = "root";
-$db   = "attendci";
-
-$conn = new mysqli($host, $user, $pass, $db);
-
-if ($conn->connect_error) {
-    echo json_encode(["success" => false, "message" => "DB connection failed: " . $conn->connect_error]);
-    exit;
-}
+// Use shared DB connection
+require_once __DIR__ . "/../db.php";
 
 // Load QR library
 require_once __DIR__ . "/vendor/phpqrcode/qrlib.php";
@@ -67,24 +57,54 @@ $sql = "INSERT INTO studentregister
 (studentID, FirstName, LastName, ContactNum, Email, DOB, Address, ParentName, ParentTelNum, 
  Relationship, PhotoPath, QRPath) 
 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
-$stmt = $conn->prepare($sql);
-$stmt->bind_param(
-    "ssssssssssss",
-    $stID, $f_name, $l_name, $tel, $email, $dob, $address, $p_name, $p_tel, $relationship,
-    $photoPath, $qrPath
-);
-
-if ($stmt->execute()) {
+try {
+    $stmt = $pdo->prepare($sql);
+    $stmt->execute([
+        $stID, $f_name, $l_name, $tel, $email, $dob, $address, $p_name, $p_tel, $relationship,
+        $photoPath, $qrPath
+    ]);
     echo json_encode([
         "success" => true,
         "message" => "Student registered successfully",
         "photo_url" => $photoPath,
         "qr_url" => $qrPath
     ]);
-} else {
-    echo json_encode(["success" => false, "message" => "Error: " . $stmt->error]);
+} catch (PDOException $e) {
+    $errorInfo = isset($e->errorInfo) ? $e->errorInfo : null;
+    $sqlState = $errorInfo[0] ?? null;
+    $driverCode = $errorInfo[1] ?? null;
+    $driverMessage = $errorInfo[2] ?? $e->getMessage();
+
+    if ($sqlState === '23000' && (int)$driverCode === 1062) {
+        $message = "A record with the same value already exists.";
+        if (strpos($driverMessage, "Email") !== false) {
+            $message = "Email is already registered.";
+        } elseif (strpos($driverMessage, "studentID") !== false) {
+            $message = "Student ID is already registered.";
+        } elseif (strpos($driverMessage, "ContactNum") !== false) {
+            $message = "Contact number is already registered.";
+        }
+        echo json_encode(["success" => false, "message" => $message]);
+    } else {
+        echo json_encode(["success" => false, "message" => "Something went wrong. Please try again."]);
+    }
+
+    // Cleanup any created files on failure
+    if (!empty($photoPath)) {
+        $photoFile = $uploadDir . basename($photoPath);
+        if (file_exists($photoFile)) {
+            @unlink($photoFile);
+        }
+    }
+    if (!empty($qrPath)) {
+        $qrFile = $uploadDir . basename($qrPath);
+        if (file_exists($qrFile)) {
+            @unlink($qrFile);
+        }
+    }
 }
 
-$stmt->close();
-$conn->close();
+// Cleanup
+$stmt = null;
+$pdo = null;
 ?>

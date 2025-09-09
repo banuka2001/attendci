@@ -52,7 +52,7 @@ const StudentRegisterPage = () => {
 		const timerId = setTimeout(() => {
 			setMessage('');
 			setMessageType('');
-		}, 2000);
+		}, 3000);
 		return () => clearTimeout(timerId);
 	}, [message]);
 
