@@ -20,7 +20,8 @@ if (isset($data->username) && isset($data->password)) {
 
     try {
         $stmt = $pdo->prepare("SELECT * FROM clients_login WHERE username = :username");
-        $stmt->execute(['username' => $username]);
+        $stmt->bindParam(':username', $username, PDO::PARAM_STR);
+        $stmt->execute();
         $user = $stmt->fetch();
 
         if ($user) {

@@ -11,7 +11,7 @@ import { useAuth } from '../../components/context/AuthContext';
 import StudentRegisterPage from './StudentRegisterPage';
 import StudentAttendPage from './StudentAttendPage';
 import AddNewTeacherPage from './AddNewTeacherPage';
-import AddClassesPage from './AddClassesPage';
+import ClassRegister from './ClassRegister';
 import StudentEnrollPage from './StudentEnrollPage';
 import Dashboard from './Dashboard';
 
@@ -45,7 +45,7 @@ const HomePage = () => {
             case 'Add New Teacher':
                 return <AddNewTeacherPage />;
             case 'Add Classes':
-                return <AddClassesPage />;
+                return <ClassRegister />;
             case 'Student Enroll':
                 return <StudentEnrollPage />;
             default:

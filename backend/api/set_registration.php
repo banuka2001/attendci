@@ -41,7 +41,11 @@ if (!in_array($role, $allowed_roles)) {
 
 try {
     $stmt = $pdo->prepare("INSERT INTO clients_login (username, Email, password, role) VALUES (:username, :email, :password, :role)");
-    $stmt->execute(['username' => $username, 'email' => $email, 'password' => $password, 'role' => $role]);
+    $stmt->bindParam(':username', $username, PDO::PARAM_STR);
+    $stmt->bindParam(':email', $email, PDO::PARAM_STR);
+    $stmt->bindParam(':password', $password, PDO::PARAM_STR);
+    $stmt->bindParam(':role', $role, PDO::PARAM_STR);
+    $stmt->execute();
 
     if ($stmt->rowCount()) {
 

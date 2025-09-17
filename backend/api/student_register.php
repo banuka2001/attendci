@@ -59,10 +59,19 @@ $sql = "INSERT INTO studentregister
 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 try {
     $stmt = $pdo->prepare($sql);
-    $stmt->execute([
-        $stID, $f_name, $l_name, $tel, $email, $dob, $address, $p_name, $p_tel, $relationship,
-        $photoPath, $qrPath
-    ]);
+    $stmt->bindParam(1, $stID, PDO::PARAM_STR);
+    $stmt->bindParam(2, $f_name, PDO::PARAM_STR);
+    $stmt->bindParam(3, $l_name, PDO::PARAM_STR);
+    $stmt->bindParam(4, $tel, PDO::PARAM_STR);
+    $stmt->bindParam(5, $email, PDO::PARAM_STR);
+    $stmt->bindParam(6, $dob, PDO::PARAM_STR);
+    $stmt->bindParam(7, $address, PDO::PARAM_STR);
+    $stmt->bindParam(8, $p_name, PDO::PARAM_STR);
+    $stmt->bindParam(9, $p_tel, PDO::PARAM_STR);
+    $stmt->bindParam(10, $relationship, PDO::PARAM_STR);
+    $stmt->bindParam(11, $photoPath, PDO::PARAM_STR);
+    $stmt->bindParam(12, $qrPath, PDO::PARAM_STR);
+    $stmt->execute();
     echo json_encode([
         "success" => true,
         "message" => "Student registered successfully",
