@@ -48,11 +48,11 @@ const TeacherRegister = () => {
   return (
     <div className="space-y-6">
       {/* Header Row */}
-      <div className="flex items-center justify-end space-x-3">
+      <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-end gap-2 sm:gap-3">
         <select
           value={selectedDevice}
           onChange={(e) => setSelectedDevice(e.target.value)}
-          className="h-10 rounded-md border border-gray-300 bg-white px-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
+          className="h-10 w-full sm:w-auto rounded-md border border-gray-300 bg-white px-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
         >
           <option value="">Select</option>
           <option value="device-1">Option 1</option>
@@ -61,20 +61,20 @@ const TeacherRegister = () => {
         <button
           type="button"
           onClick={() => setIsScanning(true)}
-          className="h-10 rounded-md bg-blue-500 px-4 text-sm font-semibold text-white shadow hover:bg-blue-600"
+          className="h-10 w-full sm:w-auto rounded-md bg-blue-500 px-4 text-sm font-semibold text-white shadow hover:bg-blue-600"
         >
           Connect Reader
         </button>
         <button
           type="button"
           onClick={() => setIsScanning(false)}
-          className="h-10 rounded-md bg-rose-400 px-4 text-sm font-semibold text-white shadow hover:bg-rose-500"
+          className="h-10 w-full sm:w-auto rounded-md bg-rose-400 px-4 text-sm font-semibold text-white shadow hover:bg-rose-500"
         >
-         Disonnect Reader
+         Disconnect Reader
         </button>
       </div>
 
-      <div className="flex h-screen bg-gray-100">
+      <div className="bg-gray-100">
         <div className="flex-1 overflow-auto">
           <header className="bg-white shadow-sm">
           {/*<div className="max-w-7xl mx-auto py-4 px-4 sm:px-6 lg:px-8 flex justify-between items-center">
@@ -88,10 +88,10 @@ const TeacherRegister = () => {
             </div>*/}
           </header>
 
-          <main className="max-w-4xl mx-auto py-6 sm:px-6 lg:px-8">
+          <main className="py-6 px-0">
             <div className="px-4 py-6 sm:px-0">
-              <div className="bg-white rounded-lg shadow border-t-4 border-blue-600">
-                <div className="border-b border-gray-200 px-6 py-4">
+              <div className="rounded-lg border border-blue-300 bg-white shadow">
+                <div className="border-b border-blue-200 px-5 py-3">
                   <h2 className="text-xl font-semibold text-gray-800">Add New Teacher</h2>
                 </div>
 
@@ -109,18 +109,14 @@ const TeacherRegister = () => {
 
                 <form 
                   onSubmit={handleSubmit} 
-                  className="p-6"
-                  style={{
-                    borderRight: '3px solid #ccc',
-                    borderBottom: '3px solid #ccc'
-                  }}
+                  className="p-5"
                 >
                   {/* Teacher ID - Full Width */}
                   <div className="mb-6">
                     <label htmlFor="TeacherID" className="block text-sm font-medium text-gray-700">
                       Teacher ID
                     </label>
-                    <div className="mt-1 relative rounded-md shadow-sm max-w-md">
+                    <div className="mt-1 relative rounded-md shadow-sm max-w-full sm:max-w-md">
                       <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                         <FaUser className="h-5 w-5 text-gray-400" />
                       </div>
@@ -137,7 +133,7 @@ const TeacherRegister = () => {
                     </div>
                   </div>
 
-                  <div className="grid grid-cols-3 md:grid-cols-2 gap-x-6 gap-y-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     {/* First Name */}
                     <div>
                       <label htmlFor="FirstName" className="block text-sm font-medium text-gray-700">
@@ -177,7 +173,7 @@ const TeacherRegister = () => {
                     </div>
                   </div>
 
-                  <div className="grid grid-cols-5 md:grid-cols-3 gap-5 mt-6">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 mt-6">
                     {/* Contact Number */}
                     <div>
                       <label htmlFor="ContactNumber" className="block text-sm font-medium text-gray-700">
