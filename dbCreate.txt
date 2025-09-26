@@ -65,3 +65,18 @@ CREATE TABLE `teacherregister` (
   UNIQUE KEY `Email` (`Email`),
   UNIQUE KEY `ContactNum` (`ContactNum`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+
+
+//Teacher Register by Ravindu
+ CREATE TABLE teacherregister (
+ TeacherID VARCHAR(50) PRIMARY KEY,
+ FirstName VARCHAR(100) NOT NULL,
+ LastName VARCHAR(100) NOT NULL,
+ Subject VARCHAR(100) NOT NULL,
+ Email VARCHAR(150) NOT NULL,
+ ContactNumber VARCHAR(20) NOT NULL,
+ Register_Date DATETIME DEFAULT CURRENT_TIMESTAMP
+ );
+
+
