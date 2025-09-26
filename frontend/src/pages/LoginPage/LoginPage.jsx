@@ -2,7 +2,7 @@ import axios from 'axios';
 
 import React, { useState } from 'react';
 // router dom for navigation
-import { Link } from 'react-router-dom';  
+import { Link, useNavigate } from 'react-router-dom';  
 import logo from '../../assets/attt-whitelogo-02.png'; 
 import backgroundImage from '../../assets/background.PNG';
 import userIcon from '../../assets/user-icon.PNG';
@@ -17,6 +17,12 @@ const LoginPage = () => {
   const [message, setMessage] = useState(''); // State to hold the message
   const [messageType, setMessageType] = useState(''); // 'success' or 'error' for the message display area color
   const { login } = useAuth();
+  const navigate = useNavigate();
+
+  const [showForgot, setShowForgot] = useState(false);
+  const [forgotEmail, setForgotEmail] = useState("");
+  const [forgotMsg, setForgotMsg] = useState("");
+
 
   const handleLogin = async (event) => {
     event.preventDefault();
@@ -56,6 +62,32 @@ const LoginPage = () => {
   }
 
 }
+
+const handleForgotSubmit = async (e) => {
+  e.preventDefault();
+  setForgotMsg("");
+  try {
+    const res = await fetch("/api/forgot_password.php", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ Email: forgotEmail }),
+    });
+    const data = await res.json();
+    
+    if (data.success) {
+      setForgotMsg(data.message);
+      // Redirect to reset password page after 2 seconds
+      setTimeout(() => {
+        navigate('/reset-password');
+      }, 2000);
+    } else {
+      setForgotMsg(data.message || "Failed to send reset code.");
+    }
+  } catch (error) {
+    console.error('Forgot password error:', error);
+    setForgotMsg("Network error. Please try again later.");
+  }
+};
 
   return (
     // Main container: Stacks vertically by default, becomes a row on medium screens
@@ -163,6 +195,35 @@ const LoginPage = () => {
                 </button>
               </div>
             </form>
+
+            {/* Forgot Password section */}
+            <div className="text-center mt-4">
+              <button
+                type="button"
+                className="text-blue-600 underline bg-transparent border-none cursor-pointer"
+                onClick={() => setShowForgot(!showForgot)}
+              >
+                Forgot Password?
+              </button>
+              {showForgot && (
+                <form onSubmit={handleForgotSubmit} className="mt-2 flex flex-col items-center">
+                  <input
+                    type="email"
+                    placeholder="Enter your registered email"
+                    value={forgotEmail}
+                    onChange={(e) => setForgotEmail(e.target.value)}
+                    required
+                    className="p-2 border border-gray-300 rounded mb-2 w-full"
+                  />
+                  <button type="submit" className="px-4 py-2 bg-blue-600 text-white rounded">
+                    Send Reset Link
+                  </button>
+                  {forgotMsg && (
+                    <div className="mt-2 text-sm text-green-700">{forgotMsg}</div>
+                  )}
+                </form>
+              )}
+            </div>
 
             {/* Registration link */}
             <div className="text-center">

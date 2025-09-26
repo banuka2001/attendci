@@ -1,0 +1,82 @@
+// Database I used
+
+-- Table: classregister
+CREATE TABLE `classregister` (
+  `ClassID` varchar(50) NOT NULL,
+  `ClassName` varchar(100) NOT NULL,
+  `ClassSubject` varchar(100) NOT NULL,
+  `ClassBatch` varchar(50) NOT NULL,
+  `ClassPrice` int NOT NULL,
+  `TeacherID` varchar(50) DEFAULT NULL,
+  PRIMARY KEY (`ClassID`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+
+-- Table: clients_login
+CREATE TABLE `clients_login` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `username` varchar(50) NOT NULL,
+  `Email` varchar(100) NOT NULL,
+  `password` varchar(255) NOT NULL,
+  `role` enum('Admin','Employee','Student') NOT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `username` (`username`),
+  UNIQUE KEY `Email` (`Email`)
+) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+
+-- Table: studentregister
+CREATE TABLE `studentregister` (
+  `studentID` varchar(50) NOT NULL,
+  `FirstName` varchar(100) NOT NULL,
+  `LastName` varchar(100) NOT NULL,
+  `DOB` datetime NOT NULL,
+  `Email` varchar(150) NOT NULL,
+  `ContactNum` varchar(20) NOT NULL,
+  `Address` varchar(255) NOT NULL,
+  `ParentName` varchar(150) NOT NULL,
+  `ParentTelNum` varchar(20) NOT NULL,
+  `Relationship` varchar(50) NOT NULL,
+  `PhotoPath` varchar(255) DEFAULT NULL,
+  `QRPath` varchar(255) DEFAULT NULL,
+  `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`studentID`),
+  UNIQUE KEY `Email` (`Email`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+
+-- Table: teacherregister
+CREATE TABLE `teacherregister` (
+  `TeacherID` varchar(50) NOT NULL,
+  `FirstName` varchar(100) NOT NULL,
+  `LastName` varchar(100) NOT NULL,
+  `Email` varchar(150) NOT NULL,
+  `ContactNum` varchar(20) NOT NULL,
+  `DOB` date NOT NULL,
+  `Address` text NOT NULL,
+  `Subject` varchar(100) NOT NULL,
+  `Qualification` varchar(200) DEFAULT NULL,
+  `Experience` int DEFAULT '0',
+  `PhotoPath` varchar(255) DEFAULT NULL,
+  `QRPath` varchar(255) DEFAULT NULL,
+  `CreatedAt` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  `UpdatedAt` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`TeacherID`),
+  UNIQUE KEY `Email` (`Email`),
+  UNIQUE KEY `ContactNum` (`ContactNum`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+
+
+//Teacher Register by Ravindu
+ CREATE TABLE teacherregister (
+ TeacherID VARCHAR(50) PRIMARY KEY,
+ FirstName VARCHAR(100) NOT NULL,
+ LastName VARCHAR(100) NOT NULL,
+ Subject VARCHAR(100) NOT NULL,
+ Email VARCHAR(150) NOT NULL,
+ ContactNumber VARCHAR(20) NOT NULL,
+ Register_Date DATETIME DEFAULT CURRENT_TIMESTAMP
+ );
+
+

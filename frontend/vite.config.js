@@ -14,7 +14,7 @@ export default defineConfig({
   server: {
     proxy: {
       '/api': {
-        target: 'http://localhost/attendci/backend',
+        target: 'http://localhost/attendci-main/attendci/backend',
         changeOrigin: true,
       },
     },
