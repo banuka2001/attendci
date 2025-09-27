@@ -52,7 +52,8 @@ if (isset($_SESSION['last_reset_time']) && isset($_SESSION['reset_email']) && $_
 
 try {
     $stmt = $pdo->prepare("SELECT id FROM clients_login WHERE Email = ?");
-    $stmt->execute([$email]);
+    $stmt->bindParam(1, $email, PDO::PARAM_STR);
+    $stmt->execute();
     
     if ($stmt->rowCount() === 0) {
         echo json_encode(["success" => false, "message" => "Email not found"]);

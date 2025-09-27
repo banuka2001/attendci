@@ -76,7 +76,8 @@ if (strlen($f_name) < 2 || strlen($f_name) > 50 || strlen($l_name) < 2 || strlen
 try {
     // Check for duplicate TeacherID
     $stmtCheck = $pdo->prepare("SELECT COUNT(*) FROM teacherregister WHERE TeacherID = ?");
-    $stmtCheck->execute([$tID]);
+    $stmtCheck->bindParam(1, $tID, PDO::PARAM_STR);
+    $stmtCheck->execute();
     $count = $stmtCheck->fetchColumn();
 
     if ($count > 0) {
@@ -86,7 +87,13 @@ try {
 
     // Insert new teacher
     $stmt = $pdo->prepare("INSERT INTO teacherregister (TeacherID, FirstName, LastName, Subject, Email, ContactNumber) VALUES (?, ?, ?, ?, ?, ?)");
-    $stmt->execute([$tID, $f_name, $l_name, $subject, $email, $tel]);
+    $stmt->bindParam(1, $tID, PDO::PARAM_STR);
+    $stmt->bindParam(2, $f_name, PDO::PARAM_STR);
+    $stmt->bindParam(3, $l_name, PDO::PARAM_STR);
+    $stmt->bindParam(4, $subject, PDO::PARAM_STR);
+    $stmt->bindParam(5, $email, PDO::PARAM_STR);
+    $stmt->bindParam(6, $tel, PDO::PARAM_STR);
+    $stmt->execute();
 
     if ($stmt->rowCount() > 0) {
         echo json_encode(["success" => true, "message" => "Teacher registered successfully"]);

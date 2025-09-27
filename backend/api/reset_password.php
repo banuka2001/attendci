@@ -109,7 +109,9 @@ try {
 
     // Update password in database
     $stmt = $pdo->prepare("UPDATE clients_login SET Password = ? WHERE Email = ?");
-    $stmt->execute([$hashedPassword, $email]);
+    $stmt->bindParam(1, $hashedPassword, PDO::PARAM_STR);
+    $stmt->bindParam(2, $email, PDO::PARAM_STR);
+    $stmt->execute();   
 
     if ($stmt->rowCount() > 0) {
         // Clear session variables
