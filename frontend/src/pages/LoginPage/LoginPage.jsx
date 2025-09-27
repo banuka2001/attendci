@@ -212,14 +212,14 @@ const handleForgotSubmit = async (e) => {
               </div>
             </form>
 
-            {/* Forgot Password section */}
-            <div className="text-center mt-4">
-              <button
-                type="button"
-                className="text-blue-600 underline bg-transparent border-none cursor-pointer"
-                onClick={() => setShowForgot(!showForgot)}
-              >
-                Forgot Password?
+              {/* Forgot Password section */}
+              <div className="text-center mt-4">
+                <button
+                  type="button"
+                  className="text-blue-600 bg-transparent border-none cursor-pointer"
+                  onClick={() => setShowForgot(!showForgot)}
+                >
+                  Forgot Password?
               </button>
               {showForgot && (
                 <form onSubmit={handleForgotSubmit} className="mt-2 flex flex-col items-center">
@@ -229,13 +229,13 @@ const handleForgotSubmit = async (e) => {
                     value={forgotEmail}
                     onChange={(e) => setForgotEmail(e.target.value)}
                     required
-                    className="p-2 border border-gray-300 rounded mb-2 w-full"
+                    className="my-5 w-full pl-12 pr-4 py-3 border border-[#2285cc] rounded-full bg-[#f4f9ff] focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent font-sans"
                   />
-                  <button type="submit" className="px-4 py-2 bg-blue-600 text-white rounded">
+                  <button type="submit" className="mb-3 w-full flex justify-center py-3 px-4 border border-transparent rounded-full shadow-sm text-sm font-medium text-white bg-gradient-to-r from-[#2285cc] to-[#004aad] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition duration-150 ease-in-out font-sans">
                     Send Reset Link
                   </button>
                   {forgotMsg && (
-                    <div className="mt-2 text-sm text-green-700">{forgotMsg}</div>
+                    <div className="mt-2 text-sm text-green-700 font-sans">{forgotMsg}</div>
                   )}
                 </form>
               )}
@@ -245,16 +245,16 @@ const handleForgotSubmit = async (e) => {
             <div className="text-center">
               <p className="text-sm text-gray-600">
                 Don't have an account?{' '}
-                <Link
+                <Link 
                   to="/register"
-                  className="font-medium text-blue-600 hover:underline"
+                  className="font-medium text-blue-600"
                 >
                   Register
                 </Link>
               </p>
             </div>
           </div>
-          <p className="mt-6 text-center text-sm text-gray-500">
+          <p className="mt-6 text-center text-sm text-gray-500 font-sans">
             Powered by AKAI CODEX
           </p>
         </div>
