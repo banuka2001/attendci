@@ -66,11 +66,27 @@ const LoginPage = () => {
 const handleForgotSubmit = async (e) => {
   e.preventDefault();
   setForgotMsg("");
+  
+  // Frontend validation
+  const trimmedEmail = forgotEmail.trim();
+  
+  if (!trimmedEmail) {
+    setForgotMsg("Email is required.");
+    return;
+  }
+  
+  // Validate email format
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  if (!emailRegex.test(trimmedEmail)) {
+    setForgotMsg("Please enter a valid email address.");
+    return;
+  }
+  
   try {
     const res = await fetch("/api/forgot_password.php", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ Email: forgotEmail }),
+      body: JSON.stringify({ Email: trimmedEmail }),
     });
     const data = await res.json();
     

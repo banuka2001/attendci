@@ -23,6 +23,56 @@ const TeacherRegister = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    
+    // Frontend validation
+    const requiredFields = [
+      { key: 'TeacherID', label: 'Teacher ID' },
+      { key: 'FirstName', label: 'First Name' },
+      { key: 'LastName', label: 'Last Name' },
+      { key: 'Subject', label: 'Subject' },
+      { key: 'Email', label: 'Email' },
+      { key: 'ContactNumber', label: 'Contact Number' }
+    ];
+    
+    const missing = requiredFields
+      .filter(f => !String(formData[f.key] || '').trim())
+      .map(f => f.label);
+    
+    if (missing.length > 0) {
+      setMessage(`Please fill the following: ${missing.join(', ')}`);
+      setMessageType('error');
+      return;
+    }
+    
+    // Validate email format
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(formData.Email.trim())) {
+      setMessage('Please enter a valid email address.');
+      setMessageType('error');
+      return;
+    }
+    
+    // Validate phone number format
+    const phoneRegex = /^[0-9+\-\s()]{7,15}$/;
+    if (!phoneRegex.test(formData.ContactNumber.trim())) {
+      setMessage('Please enter a valid phone number.');
+      setMessageType('error');
+      return;
+    }
+    
+    // Validate name lengths
+    if (formData.FirstName.trim().length < 2 || formData.FirstName.trim().length > 50) {
+      setMessage('First name must be between 2 and 50 characters.');
+      setMessageType('error');
+      return;
+    }
+    
+    if (formData.LastName.trim().length < 2 || formData.LastName.trim().length > 50) {
+      setMessage('Last name must be between 2 and 50 characters.');
+      setMessageType('error');
+      return;
+    }
+    
     try {
       const { data } = await axios.post("/api/teacher_register.php", formData);
       setMessage(data.message);
@@ -40,7 +90,11 @@ const TeacherRegister = () => {
       }
     } catch (error) {
       console.error("Error:", error);
-      setMessage("Server error while registering teacher.");
+      if (error.response) {
+        setMessage(error.response.data.message || "Server error while registering teacher.");
+      } else {
+        setMessage("Network error. Please try again.");
+      }
       setMessageType("error");
     }
   };

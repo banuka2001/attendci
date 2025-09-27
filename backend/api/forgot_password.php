@@ -1,24 +1,29 @@
 <?php
 session_start();
 header("Content-Type: application/json");
+header("Access-Control-Allow-Origin: *");
+header("Access-Control-Allow-Headers: Content-Type, Access-Control-Allow-Headers, Authorization, X-Requested-With");
+header("Access-Control-Allow-Methods: POST, OPTIONS");
 
+// Handle preflight OPTIONS request
+if ($_SERVER['REQUEST_METHOD'] == 'OPTIONS') {
+    http_response_code(200);
+    exit(0);
+}
+
+// Only allow POST requests
+if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+    http_response_code(405);
+    echo json_encode(['success' => false, 'message' => 'Method not allowed']);
+    exit();
+}
+
+require __DIR__ . '/../db.php';
 require __DIR__ . '/PHPMailer-6.10.0/src/PHPMailer.php';
 require __DIR__ . '/PHPMailer-6.10.0/src/SMTP.php';
 require __DIR__ . '/PHPMailer-6.10.0/src/Exception.php';
 use PHPMailer\PHPMailer\PHPMailer;
 use PHPMailer\PHPMailer\Exception;
-
-$host = "localhost";
-$user = "root";
-$pass = "";
-$db   = "attendci";
-$conn = new mysqli($host, $user, $pass, $db);
-
-// Check database connection
-if ($conn->connect_error) {
-    echo json_encode(["success" => false, "message" => "Database connection failed"]);
-    exit;
-}
 
 $data = json_decode(file_get_contents("php://input"), true);
 $email = $data["Email"] ?? "";
@@ -35,18 +40,26 @@ if (empty($email)) {
     exit;
 }
 
-$stmt = $conn->prepare("SELECT id FROM clients_login WHERE Email = ?");
-if (!$stmt) {
-    echo json_encode(["success" => false, "message" => "Database error occurred"]);
-    exit;
+// Check for 30-second cooldown
+if (isset($_SESSION['last_reset_time']) && isset($_SESSION['reset_email']) && $_SESSION['reset_email'] === $email) {
+    $timeDiff = time() - $_SESSION['last_reset_time'];
+    if ($timeDiff < 60) {
+        $remainingTime = 60 - $timeDiff;
+        echo json_encode(["success" => false, "message" => "Please wait {$remainingTime} seconds before requesting another reset code"]);
+        exit;
+    }
 }
 
-$stmt->bind_param("s", $email);
-$stmt->execute();
-$stmt->store_result();
-
-if ($stmt->num_rows === 0) {
-    echo json_encode(["success" => false, "message" => "Email not found"]);
+try {
+    $stmt = $pdo->prepare("SELECT id FROM clients_login WHERE Email = ?");
+    $stmt->execute([$email]);
+    
+    if ($stmt->rowCount() === 0) {
+        echo json_encode(["success" => false, "message" => "Email not found"]);
+        exit;
+    }
+} catch(PDOException $e) {
+    echo json_encode(["success" => false, "message" => "Database error occurred"]);
     exit;
 }
 
@@ -54,6 +67,7 @@ if ($stmt->num_rows === 0) {
 $resetCode = rand(100000, 999999);
 $_SESSION['reset_code'] = $resetCode;
 $_SESSION['reset_email'] = $email;
+$_SESSION['last_reset_time'] = time();
 
 // Send email
 $mail = new PHPMailer();
@@ -79,7 +93,4 @@ if ($mail->send()) {
     error_log($mail->ErrorInfo); // Log error for debugging
     echo json_encode(["success" => false, "message" => "Failed to send reset email. Please try again later."]);
 }
-
-$stmt->close();
-$conn->close();
 ?>
