@@ -16,6 +16,38 @@ const ResetPasswordPage = () => {
   const handleResetPassword = async (e) => {
     e.preventDefault();
     setMessage('');
+    
+    // Frontend validation
+    if (!resetCode.trim()) {
+      setMessage('Reset code is required.');
+      setMessageType('error');
+      return;
+    }
+    
+    if (resetCode.length !== 6 || !/^\d{6}$/.test(resetCode)) {
+      setMessage('Please enter a valid 6-digit reset code.');
+      setMessageType('error');
+      return;
+    }
+    
+    if (!newPassword.trim()) {
+      setMessage('New password is required.');
+      setMessageType('error');
+      return;
+    }
+    
+    if (newPassword.length < 6) {
+      setMessage('Password must be at least 6 characters long.');
+      setMessageType('error');
+      return;
+    }
+    
+    if (newPassword !== confirmPassword) {
+      setMessage('Passwords do not match.');
+      setMessageType('error');
+      return;
+    }
+    
     setIsLoading(true);
 
     try {
