@@ -57,16 +57,8 @@ function handleException($exception) {
 set_exception_handler('handleException');
 
 try {
-    $host = "localhost";
-    $user = "root";
-    $pass = "";
-    $db   = "attendci";
-    $conn = new mysqli($host, $user, $pass, $db);
-
-    // Check database connection
-    if ($conn->connect_error) {
-        throw new Exception("Database connection failed: " . $conn->connect_error);
-    }
+    // Use shared DB connection
+    require_once __DIR__ . "/../db.php";
 
     // Get the raw POST data
     $raw_data = file_get_contents("php://input");
@@ -116,26 +108,20 @@ try {
     $hashedPassword = password_hash($newPassword, PASSWORD_DEFAULT);
 
     // Update password in database
-    $stmt = $conn->prepare("UPDATE clients_login SET Password = ? WHERE Email = ?");
-    if (!$stmt) {
-        throw new Exception("Database error occurred: " . $conn->error);
-    }
+    $stmt = $pdo->prepare("UPDATE clients_login SET Password = ? WHERE Email = ?");
+    $stmt->execute([$hashedPassword, $email]);
 
-    $stmt->bind_param("ss", $hashedPassword, $email);
-
-    if ($stmt->execute()) {
+    if ($stmt->rowCount() > 0) {
         // Clear session variables
         unset($_SESSION['reset_code']);
         unset($_SESSION['reset_email']);
+        unset($_SESSION['last_reset_time']);
         
         $responseData = ["success" => true, "message" => "Password updated successfully"];
         echo json_encode($responseData);
     } else {
-        throw new Exception("Failed to update password: " . $stmt->error);
+        throw new Exception("Failed to update password. Email not found or no changes made.");
     }
-
-    $stmt->close();
-    $conn->close();
 
 } catch (Exception $e) {
     // Exception will be caught by the exception handler
