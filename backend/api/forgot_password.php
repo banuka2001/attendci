@@ -78,18 +78,18 @@ $mail->Debugoutput = 'error_log'; // send debug output to PHP error log
 $mail->isSMTP();
 $mail->Host = 'smtp.gmail.com';
 $mail->SMTPAuth = true;
-$mail->Username = 'tharushagimhan01@gmail.com'; // Your Gmail address
-$mail->Password = 'tqqlngkrrzpuswrm';   // Gmail App Password (not your Gmail password)
+$mail->Username = 'shippysally@gmail.com'; // Your Gmail address
+$mail->Password = 'tukkzfmyzeabvglr';   // Gmail App Password (not your Gmail password)
 $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
 $mail->Port = 587;
 
-$mail->setFrom('tharushagimhan01@gmail.com', 'attendci');
+$mail->setFrom('shippysally@gmail.com', 'attendci');
 $mail->addAddress($email);
 $mail->Subject = 'Password Reset Code';
 $mail->Body    = "Your password reset code is: $resetCode";
 
 if ($mail->send()) {
-    echo json_encode(["success" => true, "message" => "Reset code sent to your email"]);
+    echo json_encode(["success" => true, "message" => "Please check your email for reset code."]);
 } else {
     error_log($mail->ErrorInfo); // Log error for debugging
     echo json_encode(["success" => false, "message" => "Failed to send reset email. Please try again later."]);

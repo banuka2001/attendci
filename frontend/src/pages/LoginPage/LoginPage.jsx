@@ -92,16 +92,28 @@ const handleForgotSubmit = async (e) => {
     
     if (data.success) {
       setForgotMsg(data.message);
-      // Redirect to reset password page after 2 seconds
+      // Clear the message after 3 seconds
+      setTimeout(() => {
+        setForgotMsg("");
+      }, 3000);
+      // Redirect to reset password page after 3 seconds
       setTimeout(() => {
         navigate('/reset-password');
-      }, 2000);
+      }, 3000);
     } else {
       setForgotMsg(data.message || "Failed to send reset code.");
+      // Clear error message after 3 seconds
+      setTimeout(() => {
+        setForgotMsg("");
+      }, 3000);
     }
   } catch (error) {
     console.error('Forgot password error:', error);
     setForgotMsg("Network error. Please try again later.");
+    // Clear error message after 3 seconds
+    setTimeout(() => {
+      setForgotMsg("");
+    }, 3000);
   }
 };
 
@@ -231,7 +243,7 @@ const handleForgotSubmit = async (e) => {
                     required
                     className="my-5 w-full pl-12 pr-4 py-3 border border-[#2285cc] rounded-full bg-[#f4f9ff] focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent font-sans"
                   />
-                  <button type="submit" className="mb-3 w-full flex justify-center py-3 px-4 border border-transparent rounded-full shadow-sm text-sm font-medium text-white bg-gradient-to-r from-[#2285cc] to-[#004aad] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition duration-150 ease-in-out font-sans">
+                  <button type="submit" name='send-reset-link' className="mb-3 w-full flex justify-center py-3 px-4 border border-transparent rounded-full shadow-sm text-sm font-medium text-white bg-gradient-to-r from-[#2285cc] to-[#004aad] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition duration-150 ease-in-out font-sans">
                     Send Reset Link
                   </button>
                   {forgotMsg && (
