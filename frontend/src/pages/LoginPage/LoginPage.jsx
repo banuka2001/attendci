@@ -1,6 +1,9 @@
 import axios from 'axios';
 
 import React, { useState } from 'react';
+
+// This line elegantly handles both development and production
+const API_BASE = import.meta.env.VITE_API_BASE || '/api';
 // router dom for navigation
 import { Link, useNavigate } from 'react-router-dom';  
 import logo from '../../assets/attt-whitelogo-02.png'; 
@@ -29,7 +32,7 @@ const LoginPage = () => {
 
     try {
  
-      const {data} = await axios.post('/api/get_login.php' , {
+      const {data} = await axios.post(`${API_BASE}/get_login.php` , {
         username,
         password
       });
@@ -83,7 +86,7 @@ const handleForgotSubmit = async (e) => {
   }
   
   try {
-    const res = await fetch("/api/forgot_password.php", {
+    const res = await fetch(`${API_BASE}/forgot_password.php`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ Email: trimmedEmail }),

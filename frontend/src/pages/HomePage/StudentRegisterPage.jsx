@@ -1,6 +1,9 @@
 import React, { useState, useRef, useEffect } from 'react';
 import axios from 'axios';
 
+// This line elegantly handles both development and production
+const API_BASE = import.meta.env.VITE_API_BASE || '/api';
+
 const StudentRegisterPage = () => {
 	const [isScanning, setIsScanning] = useState(false);
 	const [selectedDevice, setSelectedDevice] = useState('');
@@ -100,7 +103,7 @@ const StudentRegisterPage = () => {
 				Photo: photoBase64 || null
 			};
 
-			const response = await axios.post('/api/student_register.php', payload, {
+			const response = await axios.post(`${API_BASE}/student_register.php`, payload, {
 				headers: { 'Content-Type': 'application/json' },
 				transformResponse: [(data) => data]
 			});

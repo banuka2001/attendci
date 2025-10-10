@@ -1,5 +1,8 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+
+// This line elegantly handles both development and production
+const API_BASE = import.meta.env.VITE_API_BASE || '/api';
 import logo from '../../assets/attt-whitelogo-02.png';
 import backgroundImage from '../../assets/background.PNG';
 import passwordIcon from '../../assets/pw-icon.PNG';
@@ -57,7 +60,7 @@ const ResetPasswordPage = () => {
         confirmPassword: '***'
       });
 
-      const response = await fetch('/api/reset_password.php', {
+      const response = await fetch(`${API_BASE}/reset_password.php`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

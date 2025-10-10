@@ -1,5 +1,8 @@
 import React, { useState } from "react";
 import axios from "axios";
+
+// This line elegantly handles both development and production
+const API_BASE = import.meta.env.VITE_API_BASE || '/api';
 import { FaUser, FaBook, FaEnvelope, FaPhone } from "react-icons/fa";
 
 const TeacherRegister = () => {
@@ -74,7 +77,7 @@ const TeacherRegister = () => {
     }
     
     try {
-      const { data } = await axios.post("/api/teacher_register.php", formData);
+      const { data } = await axios.post(`${API_BASE}/teacher_register.php`, formData);
       setMessage(data.message);
       setMessageType(data.success ? "success" : "error");
 

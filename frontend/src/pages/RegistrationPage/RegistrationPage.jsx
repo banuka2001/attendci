@@ -1,5 +1,8 @@
 import axios from 'axios';
 import React, { useState } from 'react';
+
+// This line elegantly handles both development and production
+const API_BASE = import.meta.env.VITE_API_BASE || '/api';
 import { Link, useNavigate } from 'react-router-dom';
 import logo from '../../assets/attt-whitelogo-02.png'; 
 import backgroundImage from '../../assets/background.PNG';
@@ -25,7 +28,7 @@ const RegistrationPage = () => {
       return;
     }
     try {
-      const { data } = await axios.post('/api/set_registration.php', {
+      const { data } = await axios.post(`${API_BASE}/set_registration.php`, {
         username,
         email,
         password,

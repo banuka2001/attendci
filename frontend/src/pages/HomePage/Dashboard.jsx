@@ -4,6 +4,9 @@ import { FaUserGraduate, FaChalkboardTeacher, FaRegChartBar } from 'react-icons/
 import { useAuth } from '../../components/context/AuthContext';
 import axios from 'axios';
 
+// This line elegantly handles both development and production
+const API_BASE = import.meta.env.VITE_API_BASE || '/api';
+
 // Chart placeholder component with Tailwind classes
 const ChartPlaceholder = () => (
     <div className="flex flex-col items-center justify-center h-64 bg-gray-50 rounded-lg border-2 border-dashed border-gray-300">
@@ -20,7 +23,7 @@ const AdminData = () => {
     useEffect(() => {
         const fetchData = async () => {
             try {
-                const response = await axios.get('/api/admin_only.php');
+                const response = await axios.get(`${API_BASE}/admin_only.php`);
                 if (response.data.success) {
                     setData(response.data.data);
                 }

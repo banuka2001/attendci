@@ -1,6 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 
+// This line elegantly handles both development and production
+const API_BASE = import.meta.env.VITE_API_BASE || '/api';
+
 const StudentEnrollPage = () => {
 	const [isScanning, setIsScanning] = useState(false);
 	const [selectedDevice, setSelectedDevice] = useState('');
@@ -58,7 +61,7 @@ const StudentEnrollPage = () => {
 	const fetchClasses = async () => {
 		setLoading(true);
 		try {
-			const { data } = await axios.get('/api/get_classes.php');
+			const { data } = await axios.get(`${API_BASE}/get_classes.php`);
 			if (data.success) {
 				setClasses(data.data || []);
 			} else {
@@ -129,7 +132,7 @@ const StudentEnrollPage = () => {
 
 		// Submit to backend API
 		try {
-			const { data } = await axios.post('/api/student_enroll.php', {
+			const { data } = await axios.post(`${API_BASE}/student_enroll.php`, {
 				studentID: formData.studentId,
 				classID: formData.classId
 			});

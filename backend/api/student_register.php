@@ -4,6 +4,13 @@
 session_start();
 
 header("Content-Type: application/json");
+
+// Allow requests from any origin
+header("Access-Control-Allow-Origin: *");
+header("Access-Control-Allow-Headers: Content-Type, Access-Control-Allow-Headers, Authorization, X-Requested-With");
+header("Access-Control-Allow-Methods: POST, OPTIONS");
+header("Content-Type: application/json; charset=UTF-8");
+
 error_reporting(E_ALL);
 ini_set('display_errors', 1);
 
