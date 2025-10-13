@@ -59,26 +59,61 @@ $qrFullPath = $uploadDir . $qrFileName;
 QRcode::png($stID, $qrFullPath, QR_ECLEVEL_L, 10, 2);
 $qrPath = "uploads/" . $qrFileName; // Save relative path for DB
 
-// Insert query
-$sql = "INSERT INTO studentregister 
-(studentID, FirstName, LastName, ContactNum, Email, DOB, Address, ParentName, ParentTelNum, 
- Relationship, PhotoPath, QRPath) 
-VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+// username is the student id
+$username = $stID;
+
+//password is : email first part + @ sign + first name + date of birth (without dashes)
+$password = substr($email, 0, strpos($email, '@')) . '@' . $f_name . str_replace('-', '', $dob);
+
+// example: email: example@gmail.com, first name: John, date of birth: 2000-01-01, password: example@John20000101
+
+$hashedPassword = password_hash($password, PASSWORD_DEFAULT);
+
+$role = 'Student';
+
+// Validate required fields
+if (empty($stID) || empty($f_name) || empty($l_name) || empty($email) || empty($dob)) {
+    echo json_encode(["success" => false, "message" => "Required fields are missing"]);
+    exit();
+}
+
+// Start transaction
+$pdo->beginTransaction();
+
 try {
-    $stmt = $pdo->prepare($sql);
-    $stmt->bindParam(1, $stID, PDO::PARAM_STR);
-    $stmt->bindParam(2, $f_name, PDO::PARAM_STR);
-    $stmt->bindParam(3, $l_name, PDO::PARAM_STR);
-    $stmt->bindParam(4, $tel, PDO::PARAM_STR);
-    $stmt->bindParam(5, $email, PDO::PARAM_STR);
-    $stmt->bindParam(6, $dob, PDO::PARAM_STR);
-    $stmt->bindParam(7, $address, PDO::PARAM_STR);
-    $stmt->bindParam(8, $p_name, PDO::PARAM_STR);
-    $stmt->bindParam(9, $p_tel, PDO::PARAM_STR);
-    $stmt->bindParam(10, $relationship, PDO::PARAM_STR);
-    $stmt->bindParam(11, $photoPath, PDO::PARAM_STR);
-    $stmt->bindParam(12, $qrPath, PDO::PARAM_STR);
-    $stmt->execute();
+    // Insert into studentregister table
+    $sqlRegister = "INSERT INTO studentregister 
+    (studentID, FirstName, LastName, ContactNum, Email, DOB, Address, ParentName, ParentTelNum, 
+     Relationship, PhotoPath, QRPath) 
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+    
+    $stmtRegister = $pdo->prepare($sqlRegister);
+    $stmtRegister->bindParam(1, $stID, PDO::PARAM_STR);
+    $stmtRegister->bindParam(2, $f_name, PDO::PARAM_STR);
+    $stmtRegister->bindParam(3, $l_name, PDO::PARAM_STR);
+    $stmtRegister->bindParam(4, $tel, PDO::PARAM_STR);
+    $stmtRegister->bindParam(5, $email, PDO::PARAM_STR);
+    $stmtRegister->bindParam(6, $dob, PDO::PARAM_STR);
+    $stmtRegister->bindParam(7, $address, PDO::PARAM_STR);
+    $stmtRegister->bindParam(8, $p_name, PDO::PARAM_STR);
+    $stmtRegister->bindParam(9, $p_tel, PDO::PARAM_STR);
+    $stmtRegister->bindParam(10, $relationship, PDO::PARAM_STR);
+    $stmtRegister->bindParam(11, $photoPath, PDO::PARAM_STR);
+    $stmtRegister->bindParam(12, $qrPath, PDO::PARAM_STR);
+    $stmtRegister->execute();
+
+    // Insert into clients_login table
+    $sqlLogin = "INSERT INTO clients_login (username, Email, password, role) VALUES (?, ?, ?, ?)";  
+    $stmtLogin = $pdo->prepare($sqlLogin);
+    $stmtLogin->bindParam(1, $username, PDO::PARAM_STR);
+    $stmtLogin->bindParam(2, $email, PDO::PARAM_STR);
+    $stmtLogin->bindParam(3, $hashedPassword, PDO::PARAM_STR);
+    $stmtLogin->bindParam(4, $role, PDO::PARAM_STR);
+    $stmtLogin->execute();
+
+    // Commit transaction
+    $pdo->commit();
+
     echo json_encode([
         "success" => true,
         "message" => "Student registered successfully",
@@ -86,6 +121,9 @@ try {
         "qr_url" => $qrPath
     ]);
 } catch (PDOException $e) {
+    // Rollback transaction on error
+    $pdo->rollback();
+    
     $errorInfo = isset($e->errorInfo) ? $e->errorInfo : null;
     $sqlState = $errorInfo[0] ?? null;
     $driverCode = $errorInfo[1] ?? null;
@@ -99,6 +137,8 @@ try {
             $message = "Student ID is already registered.";
         } elseif (strpos($driverMessage, "ContactNum") !== false) {
             $message = "Contact number is already registered.";
+        } elseif (strpos($driverMessage, "username") !== false) {
+            $message = "Username is already taken.";
         }
         echo json_encode(["success" => false, "message" => $message]);
     } else {
@@ -121,6 +161,7 @@ try {
 }
 
 // Cleanup
-$stmt = null;
+if (isset($stmtRegister)) $stmtRegister = null;
+if (isset($stmtLogin)) $stmtLogin = null;
 $pdo = null;
 ?>
