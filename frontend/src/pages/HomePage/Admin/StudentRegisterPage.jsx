@@ -257,7 +257,7 @@ const StudentRegisterPage = () => {
 					{/* Photo Card */}
 					<div className="rounded-lg border border-blue-300 bg-white shadow">
 						<div className="border-b border-blue-200 px-5 py-3">
-							<p className="text-sm font-semibold text-gray-700">Parent Information</p>
+							<p className="text-sm font-semibold text-gray-700">Student Photo</p>
 						</div>
 						<div className="p-5">
 							<div className="flex items-center justify-center h-40 w-full rounded border border-gray-300 bg-gray-50 overflow-hidden">
@@ -286,7 +286,7 @@ const StudentRegisterPage = () => {
 					{/* Parent Information */}
 					<div className="rounded-lg border border-blue-300 bg-white shadow">
 						<div className="border-b border-blue-200 px-5 py-3">
-							<p className="text-sm font-semibold text-gray-700">Parent Information</p>
+							<p className="text-sm font-semibold text-gray-700">Parent Details</p>
 						</div>
 						<div className="p-5 grid grid-cols-1 gap-4">
 							<div>
@@ -329,7 +329,7 @@ const StudentRegisterPage = () => {
 					{/* Contact Information */}
 					<div className="lg:col-span-2 rounded-lg border border-blue-300 bg-white shadow">
 						<div className="border-b border-blue-200 px-5 py-3">
-							<p className="text-sm font-semibold text-gray-700">Contact Information</p>
+							<p className="text-sm font-semibold text-gray-700">Contact Details</p>
 						</div>
 						<div className="p-5 grid grid-cols-1 gap-4 md:grid-cols-2">
 							<div className="md:col-span-2">

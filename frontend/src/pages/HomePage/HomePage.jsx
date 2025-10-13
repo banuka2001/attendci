@@ -1,33 +1,45 @@
-import React, { useState } from 'react';
-import { 
-    MdDashboard, MdSchool, MdLogout, MdMenu 
-} from 'react-icons/md';
-import { 
-    FaUserCircle, FaUserGraduate, FaChalkboardTeacher, FaUserCheck, FaUserEdit
-} from 'react-icons/fa';
+import React, { useState, useEffect } from 'react';
+import { MdDashboard, MdSchool, MdLogout, MdMenu } from 'react-icons/md';
+import { FaUserCircle, FaUserGraduate, FaChalkboardTeacher, FaUserCheck, FaUserEdit } from 'react-icons/fa';
+
 import { useAuth } from '../../components/context/AuthContext';
 
 // Import page components
-import StudentRegisterPage from './StudentRegisterPage';
-import StudentAttendPage from './StudentAttendPage';
-import AddNewTeacherPage from './AddNewTeacherPage';
-import ClassRegister from './ClassRegister';
-import StudentEnrollPage from './StudentEnrollPage';
-import Dashboard from './Dashboard';
+import StudentRegisterPage from './Admin/StudentRegisterPage';
+import StudentAttendPage from './Admin/StudentAttendPage';
+import AddNewTeacherPage from './Admin/AddNewTeacherPage';
+import ClassRegister from './Admin/ClassRegister';
+import StudentEnrollPage from './Admin/StudentEnrollPage';
+import AdminDashboard from './Admin/AdminDashboard';
+import StudentDashboard from './Student/StudentDashboard';
 
 const HomePage = () => {
     const { user, logout } = useAuth();
     const [isSidebarOpen, setSidebarOpen] = useState(false);
-    const [activeItem, setActiveItem] = useState('Dashboard'); // State for active item
+    const [activeItem, setActiveItem] = useState(''); // State for active item
+
+    // Set default active item based on user role
+    useEffect(() => {
+        if (user) {
+            if (user.role === 'Student') {
+                setActiveItem('Student Dashboard');
+            } else {
+                setActiveItem('Admin Dashboard');
+            }
+        }
+    }, [user]);
 
     // Define navigation items for different roles
     const allNavItems = [
-        { icon: <MdDashboard />, label: 'Dashboard', roles: ['Admin', 'Student'] },
-        { icon: <FaUserGraduate />, label: 'Student Register', roles: ['Admin', 'Student'] },
-        { icon: <FaUserCheck />, label: 'Student Attend', roles: ['Admin', 'Student'] },
-        { icon: <FaChalkboardTeacher />, label: 'Add New Teacher', roles: ['Admin', 'Student'] },
-        { icon: <MdSchool />, label: 'Add Classes', roles: ['Admin', 'Student'] },
-        { icon: <FaUserEdit />, label: 'Student Enroll', roles: ['Admin', 'Student'] },
+        { icon: <MdDashboard />, label: 'Admin Dashboard', roles: ['Admin', 'Teacher'] },
+        { icon: <FaUserGraduate />, label: 'Student Register', roles: ['Admin', 'Teacher'] },
+        { icon: <FaUserCheck />, label: 'Student Attend', roles: ['Admin', 'Teacher'] },
+        { icon: <FaChalkboardTeacher />, label: 'Add New Teacher', roles: ['Admin', 'Teacher'] },
+        { icon: <MdSchool />, label: 'Add Classes', roles: ['Admin', 'Teacher'] },
+        { icon: <FaUserEdit />, label: 'Student Enroll', roles: ['Admin', 'Teacher'] },
+
+
+        { icon: <MdDashboard />, label: 'Student Dashboard', roles: ['Student'] }
     ];
 
     // Filter navigation items based on user role
@@ -36,8 +48,10 @@ const HomePage = () => {
     // Function to render the current page based on activeItem
     const renderContent = () => {
         switch (activeItem) {
-            case 'Dashboard':
-                return <Dashboard />;
+            case 'Admin Dashboard':
+                return <AdminDashboard />;
+            case 'Student Dashboard':
+                return <StudentDashboard />;
             case 'Student Register':
                 return <StudentRegisterPage />;
             case 'Student Attend':
@@ -49,7 +63,7 @@ const HomePage = () => {
             case 'Student Enroll':
                 return <StudentEnrollPage />;
             default:
-                return <Dashboard />;
+                return <AdminDashboard />;
         }
     };
 

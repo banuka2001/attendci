@@ -1,7 +1,7 @@
 import React from 'react';
 import { Routes, Route } from 'react-router-dom';
 import LoginPage from './pages/LoginPage/LoginPage';
-import RegistrationPage from './pages/RegistrationPage/RegistrationPage';
+
 import ResetPasswordPage from './pages/ResetPasswordPage/ResetPasswordPage';
 import HomePage from './pages/HomePage/HomePage';
 import ProtectedRoute from './components/ProtectedRoute/ProtectedRoute';
@@ -14,7 +14,7 @@ function App() {
       <Routes>
         <Route path="/" element={<LoginPage />} />
         <Route path="/login" element={<LoginPage />} />
-        <Route path="/register" element={<RegistrationPage />} />
+
         <Route path="/reset-password" element={<ResetPasswordPage />} />
         <Route 
           path="/dashboard" 

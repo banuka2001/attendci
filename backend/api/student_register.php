@@ -66,6 +66,7 @@ $username = $stID;
 $password = substr($email, 0, strpos($email, '@')) . '@' . $f_name . str_replace('-', '', $dob);
 
 // example: email: example@gmail.com, first name: John, date of birth: 2000-01-01, password: example@John20000101
+// pahan@Pahan20060601
 
 $hashedPassword = password_hash($password, PASSWORD_DEFAULT);
 

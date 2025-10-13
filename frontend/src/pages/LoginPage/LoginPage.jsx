@@ -261,10 +261,10 @@ const handleForgotSubmit = async (e) => {
               <p className="text-sm text-gray-600">
                 Don't have an account?{' '}
                 <Link 
-                  to="/register"
+                 
                   className="font-medium text-blue-600"
                 >
-                  Register
+                  Contact your institution
                 </Link>
               </p>
             </div>

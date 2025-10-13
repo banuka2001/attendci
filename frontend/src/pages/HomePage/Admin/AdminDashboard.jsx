@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { MdSchool } from 'react-icons/md';
 import { FaUserGraduate, FaChalkboardTeacher, FaRegChartBar } from 'react-icons/fa';
-import { useAuth } from '../../components/context/AuthContext';
+import { useAuth } from '../../../components/context/AuthContext';
 import axios from 'axios';
 
 // This line elegantly handles both development and production
