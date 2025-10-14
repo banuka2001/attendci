@@ -1,6 +1,7 @@
 <?php
 session_start();
 header("Content-Type: application/json; charset=UTF-8");
+require_once __DIR__ . '/cors.php';
 
 // Check if the user is logged in and has the 'Admin' role.
 if (!isset($_SESSION['role']) || $_SESSION['role'] !== 'Admin') {

@@ -9,6 +9,7 @@ session_start();
 
 // Set JSON header immediately
 header("Content-Type: application/json");
+require_once __DIR__ . '/cors.php';
 
 // Custom error handler to return JSON errors
 function handleError($errno, $errstr, $errfile, $errline) {
