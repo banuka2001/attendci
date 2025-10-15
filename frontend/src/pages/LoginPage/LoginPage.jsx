@@ -19,6 +19,7 @@ const LoginPage = () => {
   const [password, setPassword] = useState('');
   const [message, setMessage] = useState(''); // State to hold the message
   const [messageType, setMessageType] = useState(''); // 'success' or 'error' for the message display area color
+  const [rememberMe, setRememberMe] = useState(false);
   const { login } = useAuth();
   const navigate = useNavigate();
 
@@ -34,7 +35,8 @@ const LoginPage = () => {
  
       const {data} = await axios.post(`${API_BASE}/get_login.php` , {
         username,
-        password
+        password,
+        rememberMe
       });
 
       setMessage(data.message); // Set the message from the API response
@@ -43,7 +45,9 @@ const LoginPage = () => {
         setMessageType('success');
         // On successful login, call the login function after a 1 second of delay
         setTimeout(() => {
-          login({ username: data.username, role: data.role }); 
+          console.log('Login data received:', data.user); // Debug log
+          console.log('Remember Me checkbox state:', rememberMe); // Debug log
+          login(data.user, rememberMe); // Pass user data and remember me preference
         }, 1000); // 1-second delay to show the success message
       } else {
         setMessageType('error');
@@ -207,9 +211,19 @@ const handleForgotSubmit = async (e) => {
                   className="flex items-center cursor-pointer"
                 >
                   <div className="relative">
-                    <input id="remember-me" type="checkbox" className="sr-only peer" />
-                    <div className="w-14 h-8 bg-[#a6a6a6] rounded-full peer-checked:bg-[#2285cc] transition-colors duration-300 ease-in-out"></div>
-                    <div className="absolute left-1 top-1 w-6 h-6 bg-white rounded-full transition-transform duration-300 ease-in-out transform peer-checked:translate-x-6"></div>
+                    <input 
+                      id="remember-me" 
+                      type="checkbox" 
+                      className="sr-only peer" 
+                      checked={rememberMe}
+                      onChange={(e) => setRememberMe(e.target.checked)}
+                    />
+                    <div className={`w-14 h-8 rounded-full transition-colors duration-300 ease-in-out ${
+                      rememberMe ? 'bg-[#2285cc]' : 'bg-[#a6a6a6]'
+                    }`}></div>
+                    <div className={`absolute left-1 top-1 w-6 h-6 bg-white rounded-full transition-transform duration-300 ease-in-out transform ${
+                      rememberMe ? 'translate-x-6' : 'translate-x-0'
+                    }`}></div>
                   </div>
                   <span className="ml-3 text-sm text-gray-700 font-sans">Remember Me</span>
                 </label>
@@ -279,3 +293,5 @@ const handleForgotSubmit = async (e) => {
 };
 
 export default LoginPage;
+
+

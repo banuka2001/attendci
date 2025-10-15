@@ -1,14 +1,22 @@
 <?php
+// Get the posted data first to check for rememberMe
+$data = json_decode(file_get_contents("php://input"));
+
+// Configure session based on rememberMe preference BEFORE starting session
+if (isset($data->rememberMe) && $data->rememberMe) {
+    // Set session cookie to expire in 24 hours for Remember Me
+    ini_set('session.cookie_lifetime', 24 * 60 * 60); // 24 hours
+} else {
+    // Set session cookie to expire when browser closes
+    ini_set('session.cookie_lifetime', 0);
+}
+
 session_start();
 header('Content-Type: application/json');
 require_once __DIR__ . '/cors.php';
 include '../db.php';
 
 // Vite proxy is configured to handle CORS
-
-
-// Get the posted data.
-$data = json_decode(file_get_contents("php://input"));
 
 if (isset($data->username) && isset($data->password)) {
     $username = $data->username;
@@ -28,14 +36,18 @@ if (isset($data->username) && isset($data->password)) {
         if ($user) {
             //  use password_verify()
             if (password_verify($password, $user['password'])) {
+                
                 $_SESSION['user_id'] = $user['id'];
                 $_SESSION['username'] = $user['username'];
                 $_SESSION['role'] = $user['role']; 
                 echo json_encode([
                     'success' => true, 
                     'message' => "Login successful. Redirecting...",
-                    'username' => $user['username'],
-                    'role' => $user['role']
+                    'user' => [
+                        'id' => $user['id'],
+                        'username' => $user['username'],
+                        'role' => $user['role']
+                    ]
                 ]);
             } else {
                 echo json_encode(['success' => false, 'message' => "Invalid password or Username."]);

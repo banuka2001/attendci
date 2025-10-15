@@ -14,9 +14,13 @@ import AdminDashboard from './Admin/AdminDashboard';
 import StudentDashboard from './Student/StudentDashboard';
 
 const HomePage = () => {
-    const { user, logout } = useAuth();
+    const { user, logout, isInitializing } = useAuth();
     const [isSidebarOpen, setSidebarOpen] = useState(false);
     const [activeItem, setActiveItem] = useState(''); // State for active item
+
+    // Debug logging
+    console.log('HomePage - user:', user);
+    console.log('HomePage - isInitializing:', isInitializing);
 
     // Set default active item based on user role
     useEffect(() => {
@@ -42,8 +46,8 @@ const HomePage = () => {
         { icon: <MdDashboard />, label: 'Student Dashboard', roles: ['Student'] }
     ];
 
-    // Filter navigation items based on user role
-    const navItems = allNavItems.filter(item => user && item.roles.includes(user.role));
+    // Filter navigation items based on user role - only when user is available
+    const navItems = user ? allNavItems.filter(item => item.roles.includes(user.role)) : [];
 
     // Function to render the current page based on activeItem
     const renderContent = () => {
