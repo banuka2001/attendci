@@ -138,20 +138,44 @@ const StudentRegisterPage = () => {
 		} catch (error) {
 			// eslint-disable-next-line no-console
 			console.error('Registration error', error);
+			console.error('Error response:', error.response); // Add this to see the actual response
 			setMessageType('error');
+			
 			if (error.response) {
-				const { status, statusText, data } = error.response;
-				if (typeof data === 'string') {
-					if (/duplicate entry/i.test(data)) {
-						setMessage('Student ID already exists');
-					} else {
-						setMessage(`Server error (${status} ${statusText || ''})`.trim());
+				const { status, data } = error.response;
+				
+				// Handle JSON response from backend
+				if (typeof data === 'object' && data !== null) {
+					setMessage(data.message || 'Registration failed');
+				} else if (typeof data === 'string') {
+					// Try to parse JSON string
+					try {
+						const parsedData = JSON.parse(data);
+						setMessage(parsedData.message || 'Registration failed');
+					} catch (parseError) {
+						// If it's not JSON, check for specific error patterns
+						if (/duplicate entry/i.test(data)) {
+							setMessage('Student ID already exists');
+						} else if (status === 400) {
+							setMessage('Invalid data provided. Please check your input.');
+						} else {
+							setMessage(`Server error (${status})`);
+						}
 					}
 				} else {
-					setMessage(data?.message || 'Server error occurred');
+					// Handle different status codes
+					if (status === 400) {
+						setMessage('Invalid data provided. Please check your input.');
+					} else if (status === 409) {
+						setMessage('Student ID, email, or contact number already exists.');
+					} else {
+						setMessage('Server error occurred. Please try again.');
+					}
 				}
+			} else if (error.request) {
+				setMessage('Network error. Please check your connection and try again.');
 			} else {
-				setMessage('A network error occurred while registering');
+				setMessage('An unexpected error occurred. Please try again.');
 			}
 		}
 	};

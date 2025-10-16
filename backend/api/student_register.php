@@ -4,6 +4,13 @@ session_start();
 header("Content-Type: application/json");
 require_once __DIR__ . '/cors.php';
 
+// Only allow POST requests
+if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+    http_response_code(405);
+    echo json_encode(['success' => false, 'message' => 'Method not allowed']);
+    exit();
+}
+
 error_reporting(E_ALL);
 ini_set('display_errors', 1);
 
@@ -15,22 +22,122 @@ require_once __DIR__ . "/vendor/phpqrcode/qrlib.php";
 
 // Get POST data
 $data = json_decode(file_get_contents("php://input"), true);
-$stID = $data["studentID"];
-$f_name = $data["FirstName"];
-$l_name = $data["LastName"];
-$tel = $data["ContactNum"];
-$email = $data["Email"];
-$dob = $data["DOB"];
-$address = $data["Address"];
-$p_name = $data["ParentName"];
-$p_tel = $data["ParentTelNum"];
-$relationship = $data["Relationship"];
+
+// Validate JSON data
+if (!$data) {
+    http_response_code(400);
+    echo json_encode(['success' => false, 'message' => 'Invalid JSON data']);
+    exit();
+}
+
+// Extract and trim input data
+$stID = trim($data["studentID"] ?? '');
+$f_name = trim($data["FirstName"] ?? '');
+$l_name = trim($data["LastName"] ?? '');
+$tel = trim($data["ContactNum"] ?? '');
+$email = trim($data["Email"] ?? '');
+$dob = trim($data["DOB"] ?? '');
+$address = trim($data["Address"] ?? '');
+$p_name = trim($data["ParentName"] ?? '');
+$p_tel = trim($data["ParentTelNum"] ?? '');
+$relationship = trim($data["Relationship"] ?? '');
 $photoBase64 = $data["Photo"] ?? null;
+
+// Validate required fields
+$requiredFields = [
+    'studentID' => $stID,
+    'FirstName' => $f_name,
+    'LastName' => $l_name,
+    'ContactNum' => $tel,
+    'Email' => $email,
+    'DOB' => $dob
+];
+
+$missingFields = [];
+foreach ($requiredFields as $field => $value) {
+    if (empty($value)) {
+        $missingFields[] = $field;
+    }
+}
+
+if (!empty($missingFields)) {
+    http_response_code(400);
+    echo json_encode([
+        'success' => false, 
+        'message' => 'Missing required fields: ' . implode(', ', $missingFields)
+    ]);
+    exit();
+}
+
+// Validate email format
+if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+    http_response_code(400);
+    echo json_encode(['success' => false, 'message' => 'Invalid email format']);
+    exit();
+}
+
+// Validate Sri Lankan phone number format (student)
+// Accepts formats: 0771234567, +94771234567, 0112345678, 011-234-5678
+if (!preg_match('/^(\+94|0)?[0-9]{9}$/', $tel)) {
+    http_response_code(400);
+    echo json_encode(['success' => false, 'message' => 'Invalid contact number format. Use format: 0771234567 or +94771234567']);
+    exit();
+}
+
+// Validate Sri Lankan parent phone number format (if provided)
+if (!empty($p_tel) && !preg_match('/^(\+94|0)?[0-9]{9}$/', $p_tel)) {
+    http_response_code(400);
+    echo json_encode(['success' => false, 'message' => 'Invalid parent contact number format. Use format: 0771234567 or +94771234567']);
+    exit();
+}
+
+// Validate name lengths
+if (strlen($f_name) < 2 || strlen($f_name) > 50) {
+    http_response_code(400);
+    echo json_encode(['success' => false, 'message' => 'First name must be between 2 and 50 characters']);
+    exit();
+}
+
+if (strlen($l_name) < 2 || strlen($l_name) > 50) {
+    http_response_code(400);
+    echo json_encode(['success' => false, 'message' => 'Last name must be between 2 and 50 characters']);
+    exit();
+}
+
+// Validate parent name length (if provided)
+if (!empty($p_name) && (strlen($p_name) < 2 || strlen($p_name) > 50)) {
+    http_response_code(400);
+    echo json_encode(['success' => false, 'message' => 'Parent name must be between 2 and 50 characters']);
+    exit();
+}
+
+// Validate date of birth format (YYYY-MM-DD)
+if (!preg_match('/^\d{4}-\d{2}-\d{2}$/', $dob)) {
+    http_response_code(400);
+    echo json_encode(['success' => false, 'message' => 'Date of birth must be in YYYY-MM-DD format']);
+    exit();
+}
+
+// Validate date is not in the future
+if (strtotime($dob) > time()) {
+    http_response_code(400);
+    echo json_encode(['success' => false, 'message' => 'Date of birth cannot be in the future']);
+    exit();
+}
+
+// Validate student ID format (numbers only, 3-20 characters)
+if (!preg_match('/^[0-9]{3,20}$/', $stID)) {
+    http_response_code(400);
+    echo json_encode(['success' => false, 'message' => 'Student ID must be 3-20 numbers only']);
+    exit();
+}
 
 // Upload directory
 $uploadDir = __DIR__ . "/uploads/";
 if (!file_exists($uploadDir)) {
-    mkdir($uploadDir, 0777, true);
+    if (!mkdir($uploadDir, 0777, true)) {
+        error_log("Failed to create uploads directory");
+    }
 }
 
 // Save student photo if provided
@@ -47,10 +154,17 @@ if ($photoBase64) {
 // Generate QR Code
 $qrFileName = "qr_" . $stID . "_" . time() . ".png";
 $qrFullPath = $uploadDir . $qrFileName;
+$qrPath = null;
 
-// Create QR code image
-QRcode::png($stID, $qrFullPath, QR_ECLEVEL_L, 10, 2);
-$qrPath = "uploads/" . $qrFileName; // Save relative path for DB
+try {
+    // Create QR code image
+    QRcode::png($stID, $qrFullPath, QR_ECLEVEL_L, 10, 2);
+    $qrPath = "uploads/" . $qrFileName; // Save relative path for DB
+} catch (Exception $e) {
+    // If QR generation fails, continue without QR code
+    error_log("QR generation failed: " . $e->getMessage());
+    $qrPath = null;
+}
 
 // username is the student id
 $username = $stID;
@@ -65,11 +179,43 @@ $hashedPassword = password_hash($password, PASSWORD_DEFAULT);
 
 $role = 'Student';
 
-// Validate required fields
-if (empty($stID) || empty($f_name) || empty($l_name) || empty($email) || empty($dob)) {
-    echo json_encode(["success" => false, "message" => "Required fields are missing"]);
+// Check for duplicate StudentID before processing
+try {
+    $stmtCheckStudent = $pdo->prepare("SELECT COUNT(*) FROM studentregister WHERE studentID = ?");
+    $stmtCheckStudent->bindParam(1, $stID, PDO::PARAM_STR);
+    $stmtCheckStudent->execute();
+    $studentExists = $stmtCheckStudent->fetchColumn();
+
+    if ($studentExists > 0) {
+        http_response_code(409);
+        echo json_encode(['success' => false, 'message' => 'Student ID already exists. Please use a different Student ID.']);
+        exit();
+    }
+
+    // Check for duplicate email
+    $stmtCheckEmail = $pdo->prepare("SELECT COUNT(*) FROM studentregister WHERE Email = ?");
+    $stmtCheckEmail->bindParam(1, $email, PDO::PARAM_STR);
+    $stmtCheckEmail->execute();
+    $emailExists = $stmtCheckEmail->fetchColumn();
+
+    if ($emailExists > 0) {
+        http_response_code(409);
+        echo json_encode(['success' => false, 'message' => 'Email is already registered. Please use a different email.']);
+        exit();
+    }
+
+
+} catch (PDOException $e) {
+    http_response_code(500);
+    echo json_encode([
+        'success' => false, 
+        'message' => 'Database validation error occurred. Please try again.'
+    ]);
     exit();
 }
+
+// Convert DOB string to datetime format for database
+$dob_datetime = $dob . ' 00:00:00'; // Convert YYYY-MM-DD to YYYY-MM-DD HH:MM:SS
 
 // Start transaction
 $pdo->beginTransaction();
@@ -87,14 +233,17 @@ try {
     $stmtRegister->bindParam(3, $l_name, PDO::PARAM_STR);
     $stmtRegister->bindParam(4, $tel, PDO::PARAM_STR);
     $stmtRegister->bindParam(5, $email, PDO::PARAM_STR);
-    $stmtRegister->bindParam(6, $dob, PDO::PARAM_STR);
+    $stmtRegister->bindParam(6, $dob_datetime, PDO::PARAM_STR);
     $stmtRegister->bindParam(7, $address, PDO::PARAM_STR);
     $stmtRegister->bindParam(8, $p_name, PDO::PARAM_STR);
     $stmtRegister->bindParam(9, $p_tel, PDO::PARAM_STR);
     $stmtRegister->bindParam(10, $relationship, PDO::PARAM_STR);
     $stmtRegister->bindParam(11, $photoPath, PDO::PARAM_STR);
     $stmtRegister->bindParam(12, $qrPath, PDO::PARAM_STR);
-    $stmtRegister->execute();
+    
+    if (!$stmtRegister->execute()) {
+        throw new Exception("Failed to insert into studentregister table");
+    }
 
     // Insert into clients_login table
     $sqlLogin = "INSERT INTO clients_login (username, Email, password, role) VALUES (?, ?, ?, ?)";  
@@ -103,7 +252,10 @@ try {
     $stmtLogin->bindParam(2, $email, PDO::PARAM_STR);
     $stmtLogin->bindParam(3, $hashedPassword, PDO::PARAM_STR);
     $stmtLogin->bindParam(4, $role, PDO::PARAM_STR);
-    $stmtLogin->execute();
+    
+    if (!$stmtLogin->execute()) {
+        throw new Exception("Failed to insert into clients_login table");
+    }
 
     // Commit transaction
     $pdo->commit();
@@ -118,26 +270,40 @@ try {
     // Rollback transaction on error
     $pdo->rollback();
     
-    $errorInfo = isset($e->errorInfo) ? $e->errorInfo : null;
-    $sqlState = $errorInfo[0] ?? null;
-    $driverCode = $errorInfo[1] ?? null;
-    $driverMessage = $errorInfo[2] ?? $e->getMessage();
+    http_response_code(500);
+    echo json_encode([
+        'success' => false,
+        'message' => 'Database error occurred. Please try again.'
+    ]);
+    
+    // Log error for debugging
+    error_log("Student registration PDO error: " . $e->getMessage());
 
-    if ($sqlState === '23000' && (int)$driverCode === 1062) {
-        $message = "A record with the same value already exists.";
-        if (strpos($driverMessage, "Email") !== false) {
-            $message = "Email is already registered.";
-        } elseif (strpos($driverMessage, "studentID") !== false) {
-            $message = "Student ID is already registered.";
-        } elseif (strpos($driverMessage, "ContactNum") !== false) {
-            $message = "Contact number is already registered.";
-        } elseif (strpos($driverMessage, "username") !== false) {
-            $message = "Username is already taken.";
+    // Cleanup any created files on failure
+    if (!empty($photoPath)) {
+        $photoFile = $uploadDir . basename($photoPath);
+        if (file_exists($photoFile)) {
+            @unlink($photoFile);
         }
-        echo json_encode(["success" => false, "message" => $message]);
-    } else {
-        echo json_encode(["success" => false, "message" => "Something went wrong. Please try again."]);
     }
+    if (!empty($qrPath)) {
+        $qrFile = $uploadDir . basename($qrPath);
+        if (file_exists($qrFile)) {
+            @unlink($qrFile);
+        }
+    }
+} catch (Exception $e) {
+    // Rollback transaction on error
+    $pdo->rollback();
+    
+    http_response_code(500);
+    echo json_encode([
+        'success' => false,
+        'message' => 'An unexpected error occurred. Please try again.'
+    ]);
+    
+    // Log error for debugging
+    error_log("Student registration error: " . $e->getMessage());
 
     // Cleanup any created files on failure
     if (!empty($photoPath)) {

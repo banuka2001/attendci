@@ -45,8 +45,7 @@ const LoginPage = () => {
         setMessageType('success');
         // On successful login, call the login function after a 1 second of delay
         setTimeout(() => {
-          console.log('Login data received:', data.user); // Debug log
-          console.log('Remember Me checkbox state:', rememberMe); // Debug log
+         
           login(data.user, rememberMe); // Pass user data and remember me preference
         }, 1000); // 1-second delay to show the success message
       } else {
@@ -54,7 +53,7 @@ const LoginPage = () => {
       }
     } catch (error) {
 
-      console.error('Login error:', error);
+    
       setMessageType('error');
 
       if(error.response) {
