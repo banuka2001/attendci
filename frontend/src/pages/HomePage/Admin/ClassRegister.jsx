@@ -332,7 +332,7 @@ const ClassRegister = () => {
 											<td className="px-4 py-3 text-sm text-gray-900">{classItem.ClassName}</td>
 											<td className="px-4 py-3 text-sm text-gray-900">{classItem.ClassSubject}</td>
 											<td className="px-4 py-3 text-sm text-gray-900">{classItem.ClassBatch}</td>
-											<td className="px-4 py-3 text-sm text-gray-900">${parseFloat(classItem.ClassPrice).toFixed(2)}</td>
+											<td className="px-4 py-3 text-sm text-gray-900">Rs.{parseFloat(classItem.ClassPrice).toFixed(2)}</td>
 											<td className="px-4 py-3 text-sm text-gray-900">{classItem.TeacherName || 'N/A'}</td>
 										</tr>
 									))}
