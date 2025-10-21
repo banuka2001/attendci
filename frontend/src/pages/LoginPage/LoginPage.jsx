@@ -53,8 +53,7 @@ const LoginPage = () => {
       }
     } catch (error) {
 
-    
-      setMessageType('error');
+     setMessageType('error');
 
       if(error.response) {
         // catch Server error

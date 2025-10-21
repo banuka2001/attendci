@@ -45,30 +45,6 @@ CREATE TABLE `studentregister` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 
--- Table: teacherregister
-CREATE TABLE `teacherregister` (
-  `TeacherID` varchar(50) NOT NULL,
-  `FirstName` varchar(100) NOT NULL,
-  `LastName` varchar(100) NOT NULL,
-  `Email` varchar(150) NOT NULL,
-  `ContactNum` varchar(20) NOT NULL,
-  `DOB` date NOT NULL,
-  `Address` text NOT NULL,
-  `Subject` varchar(100) NOT NULL,
-  `Qualification` varchar(200) DEFAULT NULL,
-  `Experience` int DEFAULT '0',
-  `PhotoPath` varchar(255) DEFAULT NULL,
-  `QRPath` varchar(255) DEFAULT NULL,
-  `CreatedAt` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
-  `UpdatedAt` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-  PRIMARY KEY (`TeacherID`),
-  UNIQUE KEY `Email` (`Email`),
-  UNIQUE KEY `ContactNum` (`ContactNum`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
-
-
-
-//Teacher Register by Ravindu
  CREATE TABLE teacherregister (
  TeacherID VARCHAR(50) PRIMARY KEY,
  FirstName VARCHAR(100) NOT NULL,
@@ -79,4 +55,14 @@ CREATE TABLE `teacherregister` (
  Register_Date DATETIME DEFAULT CURRENT_TIMESTAMP
  );
 
+ CREATE TABLE payment (
+ PaymentID INT AUTO_INCREMENT PRIMARY KEY,
+ ClassID VARCHAR(50),
+ StudentID VARCHAR(50),
+ Payment INT,
+ Year VARCHAR(4),
+ Month VARCHAR(100),
+ PaymentDate DATETIME DEFAULT CURRENT_TIMESTAMP
+ ) AUTO_INCREMENT = 1001
 
+ 
