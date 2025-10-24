@@ -34,22 +34,45 @@ try {
     
     $studentID = $user['username']; // username is the student ID
     
-    // Get payment history (newest 3 entries)
-    $stmt = $pdo->prepare("
-        SELECT 
-            p.PaymentID,
-            p.Payment as Amount,
-            p.PaymentDate,
-            p.Year,
-            p.Month,
-            c.ClassName,
-            c.ClassSubject
-        FROM payment p
-        LEFT JOIN classregister c ON p.ClassID = c.ClassID
-        WHERE p.StudentID = ?
-        ORDER BY p.PaymentDate DESC
-        LIMIT 3
-    ");
+    // Check if we need to fetch all payments or just the latest 3
+    $fetchAll = isset($_GET['all']) && $_GET['all'] === 'true';
+    
+    if ($fetchAll) {
+        // Get all payment history with ClassID
+        $stmt = $pdo->prepare("
+            SELECT 
+                p.PaymentID,
+                p.ClassID,
+                p.Payment as Amount,
+                p.PaymentDate,
+                p.Year,
+                p.Month,
+                c.ClassName,
+                c.ClassSubject
+            FROM payment p
+            LEFT JOIN classregister c ON p.ClassID = c.ClassID
+            WHERE p.StudentID = ?
+            ORDER BY p.PaymentDate DESC
+        ");
+    } else {
+        // Get payment history (newest 3 entries)
+        $stmt = $pdo->prepare("
+            SELECT 
+                p.PaymentID,
+                p.Payment as Amount,
+                p.PaymentDate,
+                p.Year,
+                p.Month,
+                c.ClassName,
+                c.ClassSubject
+            FROM payment p
+            LEFT JOIN classregister c ON p.ClassID = c.ClassID
+            WHERE p.StudentID = ?
+            ORDER BY p.PaymentDate DESC
+            LIMIT 3
+        ");
+    }
+    
     $stmt->bindParam(1, $studentID, PDO::PARAM_STR);
     $stmt->execute();
     $payments = $stmt->fetchAll(PDO::FETCH_ASSOC);

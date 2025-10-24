@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { MdDashboard, MdSchool, MdLogout, MdMenu } from 'react-icons/md';
-import { FaUserCircle, FaUserGraduate, FaChalkboardTeacher, FaUserCheck, FaUserEdit, FaGraduationCap } from 'react-icons/fa';
+import { FaUserCircle, FaUserGraduate, FaChalkboardTeacher, FaUserCheck, FaUserEdit, FaGraduationCap, FaCreditCard } from 'react-icons/fa';
 
 import { useAuth } from '../../components/context/AuthContext';
 
@@ -13,6 +13,7 @@ import StudentEnrollPage from './Admin/StudentEnrollPage';
 import AdminDashboard from './Admin/AdminDashboard';
 import StudentDashboard from './Student/StudentDashboard';
 import MyClasses from './Student/MyClasses';
+import Payments from './Student/Payments';
 
 const HomePage = () => {
     const { user, logout, isInitializing } = useAuth();
@@ -45,7 +46,8 @@ const HomePage = () => {
 
 
         { icon: <MdDashboard />, label: 'Student Dashboard', roles: ['Student'] },
-        { icon: <FaGraduationCap />, label: 'My Classes', roles: ['Student'] }
+        { icon: <FaGraduationCap />, label: 'My Classes', roles: ['Student'] },
+        { icon: <FaCreditCard />, label: 'Payments', roles: ['Student'] }
     ];
 
     // Filter navigation items based on user role - only when user is available
@@ -60,6 +62,8 @@ const HomePage = () => {
                 return <StudentDashboard />;
             case 'My Classes':
                 return <MyClasses />;
+            case 'Payments':
+                return <Payments />;
             case 'Student Register':
                 return <StudentRegisterPage />;
             case 'Student Attend':
