@@ -4,6 +4,20 @@ session_start();
 header("Content-Type: application/json");
 require_once __DIR__ . '/cors.php';
 
+// Use shared DB connection
+require_once __DIR__ . "/../db.php";
+
+// Load QR library
+require_once __DIR__ . "/vendor/phpqrcode/qrlib.php";
+
+// Load PHPMailer
+require __DIR__ . '/PHPMailer-6.10.0/src/PHPMailer.php';
+require __DIR__ . '/PHPMailer-6.10.0/src/SMTP.php';
+require __DIR__ . '/PHPMailer-6.10.0/src/Exception.php';
+use PHPMailer\PHPMailer\PHPMailer;
+use PHPMailer\PHPMailer\SMTP;
+use PHPMailer\PHPMailer\Exception;
+
 // Only allow POST requests
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     http_response_code(405);
@@ -14,11 +28,7 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
 error_reporting(E_ALL);
 ini_set('display_errors', 1);
 
-// Use shared DB connection
-require_once __DIR__ . "/../db.php";
 
-// Load QR library
-require_once __DIR__ . "/vendor/phpqrcode/qrlib.php";
 
 // Get POST data
 $data = json_decode(file_get_contents("php://input"), true);
@@ -204,6 +214,29 @@ try {
         exit();
     }
 
+    // Check for duplicate email in clients_login table
+    $stmtCheckEmailLogin = $pdo->prepare("SELECT COUNT(*) FROM clients_login WHERE Email = ?");
+    $stmtCheckEmailLogin->bindParam(1, $email, PDO::PARAM_STR);
+    $stmtCheckEmailLogin->execute();
+    $emailExistsInLogin = $stmtCheckEmailLogin->fetchColumn();
+
+    if ($emailExistsInLogin > 0) {
+        http_response_code(409);
+        echo json_encode(['success' => false, 'message' => 'Email is already registered. Please use a different email.']);
+        exit();
+    }
+
+    // Check for duplicate username in clients_login table
+    $stmtCheckUsername = $pdo->prepare("SELECT COUNT(*) FROM clients_login WHERE username = ?");
+    $stmtCheckUsername->bindParam(1, $username, PDO::PARAM_STR);
+    $stmtCheckUsername->execute();
+    $usernameExists = $stmtCheckUsername->fetchColumn();
+
+    if ($usernameExists > 0) {
+        http_response_code(409);
+        echo json_encode(['success' => false, 'message' => 'Username (Student ID) is already registered. Please use a different Student ID.']);
+        exit();
+    }
 
 } catch (PDOException $e) {
     http_response_code(500);
@@ -260,24 +293,73 @@ try {
     // Commit transaction
     $pdo->commit();
 
+    // Send welcome email (silently - don't output anything)
+    try {
+        $mail = new PHPMailer(true);
+        
+        //Server settings
+        $mail->SMTPDebug = 0;                      // Disable debug output
+        $mail->isSMTP();                           //Send using SMTP
+        $mail->Host       = 'smtp.gmail.com';      //Set the SMTP server to send through
+        $mail->SMTPAuth   = true;                  //Enable SMTP authentication
+        $mail->Username   = 'shippysally@gmail.com';  //SMTP username
+        $mail->Password   = 'tukkzfmyzeabvglr';    //SMTP password
+        $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;  //Enable implicit TLS encryption
+        $mail->Port       = 587;                   //TCP port to connect to
+
+        //Recipients
+        $mail->setFrom('shippysally@gmail.com', 'Attendci Registration');
+        $mail->addAddress($email, $f_name . ' ' . $l_name);  //Send to student
+        
+        //Attachments
+        $mail->addAttachment($qrFullPath, 'Student_QR.png');
+        
+
+        //Content
+        $mail->isHTML(true);                       //Set email format to HTML
+        $mail->Subject = 'Welcome to Attendci';
+        
+        // Create email body using HEREDOC for cleaner syntax
+        $mail->Body = <<<EOT
+                <h3>Dear {$f_name} {$l_name},</h3>
+
+                <p>Your registration has been successfully completed. Your login credentials are as follows:</p>
+
+                <p>Username: {$username}</p>
+                <p>Password: {$password}</p>
+
+                <p>Please use these credentials to login to your account.</p>
+                <br>
+                <p>Attached is your unique QR code. Please keep it safe for attendance and identification purposes.</p>
+                <br>
+                <p>Regards,<br>Attendci Team</p>
+EOT;
+        
+        $mail->send();
+    } catch (Exception $e) {
+        // Log error but don't fail the registration
+        error_log("Email sending failed: " . $e->getMessage());
+    }
+
     echo json_encode([
         "success" => true,
         "message" => "Student registered successfully",
         "photo_url" => $photoPath,
         "qr_url" => $qrPath
     ]);
+
 } catch (PDOException $e) {
     // Rollback transaction on error
     $pdo->rollback();
     
+    // Log error for debugging
+    error_log("Student registration PDO error: " . $e->getMessage());
+    
     http_response_code(500);
     echo json_encode([
         'success' => false,
-        'message' => 'Database error occurred. Please try again.'
+        'message' => 'Database error occurred: ' . $e->getMessage()
     ]);
-    
-    // Log error for debugging
-    error_log("Student registration PDO error: " . $e->getMessage());
 
     // Cleanup any created files on failure
     if (!empty($photoPath)) {
@@ -294,16 +376,18 @@ try {
     }
 } catch (Exception $e) {
     // Rollback transaction on error
-    $pdo->rollback();
+    if ($pdo->inTransaction()) {
+        $pdo->rollback();
+    }
+    
+    // Log error for debugging
+    error_log("Student registration error: " . $e->getMessage());
     
     http_response_code(500);
     echo json_encode([
         'success' => false,
-        'message' => 'An unexpected error occurred. Please try again.'
+        'message' => 'An unexpected error occurred: ' . $e->getMessage()
     ]);
-    
-    // Log error for debugging
-    error_log("Student registration error: " . $e->getMessage());
 
     // Cleanup any created files on failure
     if (!empty($photoPath)) {
@@ -323,5 +407,5 @@ try {
 // Cleanup
 if (isset($stmtRegister)) $stmtRegister = null;
 if (isset($stmtLogin)) $stmtLogin = null;
-$pdo = null;
+if (isset($pdo)) $pdo = null;
 ?>

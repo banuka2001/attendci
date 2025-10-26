@@ -10,6 +10,7 @@ const StudentRegisterPage = () => {
 	const [photoPreviewUrl, setPhotoPreviewUrl] = useState('');
 	const [message, setMessage] = useState('');
 	const [messageType, setMessageType] = useState('');
+	const [isProcessing, setIsProcessing] = useState(false);
 
 	const fileInputRef = useRef(null);
 	const [photoBase64, setPhotoBase64] = useState('');
@@ -88,6 +89,10 @@ const StudentRegisterPage = () => {
 			setMessage('Enter a valid Date of Birth');
 			return;
 		}
+		setIsProcessing(true);
+		setMessage('Processing...');
+		setMessageType('');
+
 		try {
 			const payload = {
 				studentID: formData.studentId,
@@ -131,15 +136,18 @@ const StudentRegisterPage = () => {
 				setPhotoPreviewUrl('');
 				setPhotoBase64('');
 				if (fileInputRef.current) fileInputRef.current.value = '';
+				setIsProcessing(false);
 			} else {
-				setMessage(resp?.message || 'Registration failed');
+				setMessage(resp?.message || console.log(message));
 				setMessageType('error');
+				setIsProcessing(false);
 			}
 		} catch (error) {
 			// eslint-disable-next-line no-console
 			console.error('Registration error', error);
 			console.error('Error response:', error.response); // Add this to see the actual response
 			setMessageType('error');
+			setIsProcessing(false);
 			
 			if (error.response) {
 				const { status, data } = error.response;
@@ -392,8 +400,16 @@ const StudentRegisterPage = () => {
 
 				{/* Footer Action */}
 				<div className="flex justify-end">
-					<button type="submit" className="rounded-full bg-emerald-500 px-6 py-2 text-sm font-semibold text-white shadow hover:bg-emerald-600">
-						Insert
+					<button 
+						type="submit" 
+						disabled={isProcessing}
+						className={`rounded-full px-6 py-2 text-sm font-semibold text-white shadow ${
+							isProcessing 
+								? 'bg-gray-400 cursor-not-allowed' 
+								: 'bg-emerald-500 hover:bg-emerald-600'
+						}`}
+					>
+						{isProcessing ? 'Processing...' : 'Insert'}
 					</button>
 				</div>
 			</form>
